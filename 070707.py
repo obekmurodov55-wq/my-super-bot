@@ -1,4 +1,15 @@
 from db_manager import user_saqlash
+import os
+from threading import Thread
+from flask import Flask
+
+app = Flask(__name__)
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run():
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 import telebot, os, yt_dlp, time, re
 import database
 from telebot import types
@@ -87,6 +98,15 @@ def download(c):
 
 
 if __name__ == "__main__":
-    if not os.path.exists('downloads'): os.makedirs('downloads')
+    # Yuklanadigan fayllar uchun papka ochish
+    if not os.path.exists('downloads'):
+        os.makedirs('downloads')
+        
+    # Render uchun soxta serverni alohida oqimda ishga tushiramiz
+    t = Thread(target=run)
+    t.daemon = True
+    t.start()
+    
     print("🚀 BOT ISHLASHGA TAYYOR!")
+    # Botni ishga tushirish
     bot.infinity_polling()
