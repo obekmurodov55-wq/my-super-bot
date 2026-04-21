@@ -6,6 +6,7 @@ from threading import Thread
 
 # Flask server (Render o'chib qolmasligi uchun)
 app = Flask(__name__)
+
 @app.route('/')
 def home():
     return "Bot is running!"
@@ -29,61 +30,40 @@ def start(m):
 def search_hint(m):
     bot.send_message(m.chat.id, "🎵 Musiqa nomini yoki ijrochini yozing:")
 
+@bot.inline_handler(lambda query: len(query.query) > 0)
+def query_text(inline_query):
+    try:
+        query = inline_query.query
+        # Inline natija oynasi
+        r = types.InlineQueryResultArticle(
+            id='1',
+            title=f"🎵 '{query}' musiqasini qidirish",
+            description="Musiqalarni ko'rish uchun bosing",
+            input_message_content=types.InputTextMessageContent(
+                message_text=f"🔍 **{query}** musiqasi qidirilmoqda..."
+            ),
+            reply_markup=types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton("🎧 Musiqani tanlash", switch_inline_query_current_chat=query)
+            )
+        )
+        bot.answer_inline_query(inline_query.id, [r], cache_time=1)
+    except Exception as e:
+        print(f"Inline xatosi: {e}")
+
 @bot.message_handler(func=lambda m: True)
 def handle_text(m):
     query = m.text
-    # Foydalanuvchiga qidiruv havolasini beramiz (Inline rejim)
-    # Bu usul Telegram bazasidan eng yaxshi musiqalarni topib beradi
     msg = f"🔍 **'{query}'** uchun musiqalar topildi!\n\nEshitish uchun pastdagi tugmani bosing:"
     
     markup = types.InlineKeyboardMarkup()
-    # Telegramning o'zini global musiqa bazasiga yo'naltiramiz
+    # Bu tugma bosilganda @bot nomi va so'z avtomatik yoziladi
     btn = types.InlineKeyboardButton(text="🎵 Musiqalarni ko'rish", switch_inline_query_current_chat=query)
     markup.add(btn)
     
     bot.send_message(m.chat.id, msg, reply_markup=markup, parse_mode="Markdown")
 
-# Serverni alohida oqimda ishga tushirish
+# Botni ishga tushirish (Hamma handlerlardan keyin bo'lishi shart!)
 if __name__ == "__main__":
     t = Thread(target=run)
     t.start()
     bot.polling(none_stop=True)
-@bot.inline_handler(lambda query: len(query.query) > 0)
-def query_text(inline_query):
-    try:
-        # Bu yerda Telegram bazasidan musiqalarni qidirish ssenariysi
-        # Hozircha eng sodda va ishlaydigan usul:
-        r = types.InlineQueryResultArticle(
-            id='1', 
-            title=f"🔍 '{inline_query.query}' uchun qidiruv",
-            description="Musiqani eshitish uchun bosing",
-            input_message_content=types.InputTextMessageContent(
-                message_text=f"🎵 {inline_query.query} musiqasi qidirilmoqda..."
-            ),
-            reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton("🎧 VK Music orqali eshitish", url=f"https://t.me/vkmusic_bot?start={inline_query.query}")
-            )
-        )
-        bot.answer_inline_query(inline_query.id, [r])
-    except Exception as e:
-        print(e)
-@bot.inline_handler(lambda query: len(query.query) > 0)
-def query_text(inline_query):
-    try:
-        # Foydalanuvchi yozgan so'z bo'yicha qidiruv natijasi
-        # Bu yerda biz Telegramning global musiqa bazasiga yo'naltirilgan natija chiqaramiz
-        r = types.InlineQueryResultArticle(
-            id='1',
-            title=f"🎵 '{inline_query.query}' musiqasini yuklash",
-            description="Musiqani topish va yuborish uchun bosing",
-            input_message_content=types.InputTextMessageContent(
-                message_text=f"🔍 **{inline_query.query}** musiqasi qidirilmoqda..."
-            ),
-            reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton("🎧 Musiqani tanlash", switch_inline_query_current_chat=inline_query.query)
-            )
-        )
-        # Natijani foydalanuvchiga ko'rsatamiz
-        bot.answer_inline_query(inline_query.id, [r], cache_time=1)
-    except Exception as e:
-        print(f"Inline xatosi: {e}")
