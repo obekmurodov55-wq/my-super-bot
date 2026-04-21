@@ -28,8 +28,10 @@ def clean_name(text):
 @bot.message_handler(commands=['start'])
 def start(m):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton("🔍 Musiqa qidirish"), types.KeyboardButton("ℹ️ Yordam"))
-    bot.send_message(m.chat.id, "🌟 **X-SOS Music botiga xush kelibsiz!**", reply_markup=markup, parse_mode="Markdown")
+    item1 = types.KeyboardButton("🔍 Musiqa qidirish")
+    item2 = types.KeyboardButton("ℹ️ Yordam")
+    markup.add(item1, item2)
+    bot.send_message(m.chat.id, "🌟 **X-SOS Music** botiga xush kelibsiz!", reply_markup=markup, parse_mode="Markdown")
 
 
 @bot.message_handler(func=lambda m: True)
