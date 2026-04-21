@@ -1,9 +1,17 @@
 import sqlite3
 
-def user_saqlash(user_id, username, first_name):
-    conn = sqlite3.connect('users.db')
+def init_db():
+    conn = sqlite3.connect('music.db')
     cursor = conn.cursor()
-    cursor.execute('INSERT OR REPLACE INTO users (user_id, username, first_name) VALUES (?, ?, ?)', 
-                   (user_id, username, first_name))
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS songs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            file_id TEXT NOT NULL
+        )
+    ''')
     conn.commit()
     conn.close()
+
+if __name__ == "__main__":
+    init_db()
