@@ -1,14 +1,9 @@
-import os
+import sqlite3
 
-USERS_FILE = "users.txt"
-
-def user_saqlash(user_id):
-    if not os.path.exists(USERS_FILE):
-        open(USERS_FILE, "w").close()
-
-    with open(USERS_FILE, "r") as f:
-        azolar = f.read().splitlines()
-
-    if str(user_id) not in azolar:
-        with open(USERS_FILE, "a") as f:
-            f.write(f"{user_id}\n")
+def user_saqlash(user_id, username, first_name):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT OR REPLACE INTO users (user_id, username, first_name) VALUES (?, ?, ?)', 
+                   (user_id, username, first_name))
+    conn.commit()
+    conn.close()
