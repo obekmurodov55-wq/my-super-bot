@@ -48,3 +48,22 @@ if __name__ == "__main__":
     t = Thread(target=run)
     t.start()
     bot.polling(none_stop=True)
+@bot.inline_handler(lambda query: len(query.query) > 0)
+def query_text(inline_query):
+    try:
+        # Bu yerda Telegram bazasidan musiqalarni qidirish ssenariysi
+        # Hozircha eng sodda va ishlaydigan usul:
+        r = types.InlineQueryResultArticle(
+            id='1', 
+            title=f"🔍 '{inline_query.query}' uchun qidiruv",
+            description="Musiqani eshitish uchun bosing",
+            input_message_content=types.InputTextMessageContent(
+                message_text=f"🎵 {inline_query.query} musiqasi qidirilmoqda..."
+            ),
+            reply_markup=types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton("🎧 VK Music orqali eshitish", url=f"https://t.me/vkmusic_bot?start={inline_query.query}")
+            )
+        )
+        bot.answer_inline_query(inline_query.id, [r])
+    except Exception as e:
+        print(e)
