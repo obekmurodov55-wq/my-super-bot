@@ -67,3 +67,23 @@ def query_text(inline_query):
         bot.answer_inline_query(inline_query.id, [r])
     except Exception as e:
         print(e)
+@bot.inline_handler(lambda query: len(query.query) > 0)
+def query_text(inline_query):
+    try:
+        # Foydalanuvchi yozgan so'z bo'yicha qidiruv natijasi
+        # Bu yerda biz Telegramning global musiqa bazasiga yo'naltirilgan natija chiqaramiz
+        r = types.InlineQueryResultArticle(
+            id='1',
+            title=f"🎵 '{inline_query.query}' musiqasini yuklash",
+            description="Musiqani topish va yuborish uchun bosing",
+            input_message_content=types.InputTextMessageContent(
+                message_text=f"🔍 **{inline_query.query}** musiqasi qidirilmoqda..."
+            ),
+            reply_markup=types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton("🎧 Musiqani tanlash", switch_inline_query_current_chat=inline_query.query)
+            )
+        )
+        # Natijani foydalanuvchiga ko'rsatamiz
+        bot.answer_inline_query(inline_query.id, [r], cache_time=1)
+    except Exception as e:
+        print(f"Inline xatosi: {e}")
