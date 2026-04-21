@@ -25,7 +25,7 @@ def start(m):
     item1 = types.KeyboardButton("🔍 Musiqa qidirish")
     item2 = types.KeyboardButton("ℹ️ Yordam")
     markup.add(item1, item2)
-    bot.send_message(m.chat.id, "🌟 **X-SOS Muzic** botiga xush kelibsiz!\n\nMusiqa nomini yozing:", reply_markup=markup, parse_mode="Markdown")
+    bot.send_message(m.chat.id, "🌟 **X-SOS Music** botiga xush kelibsiz!\n\nMusiqa nomini yozing:", reply_markup=markup, parse_mode="Markdown")
 
 # 4. Musiqa qidirish tugmasi bosilganda
 @bot.message_handler(func=lambda m: m.text == "🔍 Musiqa qidirish")
