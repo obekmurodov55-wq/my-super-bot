@@ -3,62 +3,85 @@ from telebot import types
 import os
 from flask import Flask
 from threading import Thread
+import time
 
-# Flask server
+# 1. Flask server (Render o'chib qolmasligi uchun "Antivirus")
 app = Flask(__name__)
+
 @app.route('/')
 def home():
-    return "Bot is running!"
+    return "X-SONIC Music Bot is Live!"
 
 def run():
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
-TOKEN = "8658483861:AAGwC23u5bGRViLCXeemby8I_q-oz5SPB5c"
+# 2. Bot sozlamalari
+# DIQQAT: Agar xato bersa, BotFather-dan tokenni REVOKE qilib yangisini qo'ying!
+TOKEN = "8658483861:AAHXsWeW8xrSfVtiB212cvS5kWtzYuc1z8k"
 bot = telebot.TeleBot(TOKEN)
 
-# 1. INLINE HANDLER - BU QIDIRUV OYNASINI TO'LDIRADI
-@bot.inline_handler(lambda query: True) # Har qanday yozuvga javob beradi
+# 3. INLINE HANDLER (Musiqa qidirish oynasi)
+@bot.inline_handler(lambda query: True)
 def query_text(inline_query):
     try:
-        q = inline_query.query if inline_query.query else "musiqa"
+        q = inline_query.query if inline_query.query else "Top"
         
-        # Natija oynasida chiqadigan narsa
+        # Qidiruv natijasi sifatida bitta chiroyli karta chiqaramiz
         result = types.InlineQueryResultArticle(
             id='1',
-            title=f"🎵 '{q}' musiqasini yuklash",
-            description="Barcha musiqalarni ko'rish va tanlash uchun bosing",
+            title=f"🎵 '{q}' uchun musiqalar tayyor!",
+            description="Musiqalarni eshitish va yuklash uchun bosing",
             thumb_url="https://repost.uz/storage/uploads/95-1610453302-music-db-entry.jpg",
             input_message_content=types.InputTextMessageContent(
-                message_text=f"🔍 **{q}** musiqasi qidirilmoqda...\n\nPastdagi tugma orqali musiqani tanlang:"
+                message_text=f"🔍 **{q}** bo'yicha qidiruv natijalari topildi.\n\nPastdagi tugma orqali musiqalarni tanlashingiz mumkin 👇",
+                parse_mode="Markdown"
             ),
             reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton("🎧 Musiqani tanlash", url=f"https://t.me/vkmusic_bot?start={q}")
+                types.InlineKeyboardButton("🎧 Musiqalarni tanlash", url=f"https://t.me/vkmusic_bot?start={q}")
             )
         )
-        
-        # Natijani darrov yuboramiz
         bot.answer_inline_query(inline_query.id, [result], cache_time=1)
     except Exception as e:
         print(f"Inline xato: {e}")
 
-# 2. START BUYRUG'I
+# 4. START BUYRUG'I
 @bot.message_handler(commands=['start'])
 def start(m):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("🔍 Musiqa qidirish")
-    bot.send_message(m.chat.id, "🌟 **X-SONIC Music**\n\nMusiqa nomini yozing:", reply_markup=markup, parse_mode="Markdown")
+    markup.add(types.KeyboardButton("🔍 Musiqa qidirish"))
+    welcome_text = (
+        "🌟 **X-SONIC MUSIC**\n\n"
+        "Eng tezkor musiqa qidirish botiga xush kelibsiz!\n"
+        "Musiqa nomini yozing yoki tugmani bosing:"
+    )
+    bot.send_message(m.chat.id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
-# 3. ODDIY XABARLAR
+# 5. ODDIY MATNLI QIDIRUV
 @bot.message_handler(func=lambda m: True)
-def handle_text(m):
+def handle_all_messages(m):
     query = m.text
-    markup = types.InlineKeyboardMarkup()
-    # switch_inline_query_current_chat o'rniga switch_inline_query ishlatamiz (xato bermasligi uchun)
-    btn = types.InlineKeyboardButton(text="🎵 Musiqalarni ko'rish", switch_inline_query=query)
-    markup.add(btn)
-    bot.send_message(m.chat.id, f"🔍 **'{query}'** uchun qidiruv tayyor!", reply_markup=markup, parse_mode="Markdown")
+    if query == "🔍 Musiqa qidirish":
+        bot.send_message(m.chat.id, "🎵 Musiqa yoki ijrochi nomini yozing:")
+        return
 
+    markup = types.InlineKeyboardMarkup()
+    # switch_inline_query tugmasi - bu eng to'g'ri yo'l!
+    btn = types.InlineKeyboardButton(text="🎧 Natijalarni ko'rish", switch_inline_query=query)
+    markup.add(btn)
+    
+    bot.send_message(m.chat.id, f"🔍 **'{query}'** qidirilmoqda...", reply_markup=markup, parse_mode="Markdown")
+
+# 6. ASOSIY ISHGA TUSHIRISH QISMI
 if __name__ == "__main__":
+    # Serverni alohida oqimda yoqamiz
     t = Thread(target=run)
     t.start()
-    bot.polling(none_stop=True)
+    
+    # Conflict 409 xatosini oldini olish uchun kichik pauza va polling
+    print("Bot muvaffaqiyatli ishga tushdi...")
+    while True:
+        try:
+            bot.polling(none_stop=True, interval=0, timeout=20)
+        except Exception as e:
+            print(f"Polling xatosi: {e}")
+            time.sleep(5) # Xato bo'lsa 5 soniya kutib qayta urinadi
