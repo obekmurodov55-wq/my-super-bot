@@ -10,14 +10,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "X-SONIC Music Bot is Live!"
+    return "X-SOS Music Bot is Live!"
 
 def run():
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 # 2. Bot sozlamalari
 # DIQQAT: Agar xato bersa, BotFather-dan tokenni REVOKE qilib yangisini qo'ying!
-TOKEN = "8658483861:AAHXsWeW8xrSfVtiB212cvS5kWtzYuc1z8k"
+TOKEN = "8658483861:AAEBvjVByzSrFuGNcf_eQbr6Ku5sW5znc3I"
 bot = telebot.TeleBot(TOKEN)
 
 # 3. INLINE HANDLER (Musiqa qidirish oynasi)
