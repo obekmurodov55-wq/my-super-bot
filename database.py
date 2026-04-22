@@ -1,17 +1,18 @@
 import sqlite3
 
-def init_db():
-    conn = sqlite3.connect('music.db')
+def create_db():
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS songs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            file_id TEXT NOT NULL
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT,
+            first_name TEXT,
+            join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     conn.commit()
     conn.close()
 
 if __name__ == "__main__":
-    init_db()
+    create_db()
